@@ -110,17 +110,58 @@ const App = () => {
     }
   };
 
-  const handleApiKeyChange = async (provider, value) => {
+  const handleApiKeyChange = (provider, value) => {
     const keyName = `${provider}_key`;
     setApiKeys(prev => ({ ...prev, [keyName]: value }));
     
-    if (value) {
-      // Test the API key
-      const defaultModel = AVAILABLE_MODELS[provider][0];
-      const isValid = await testApiKey(provider, value, defaultModel);
-      setValidatedKeys(prev => ({ ...prev, [provider]: isValid }));
-    } else {
-      setValidatedKeys(prev => ({ ...prev, [provider]: false }));
+    // Clear validation status when key changes
+    setValidatedKeys(prev => ({ ...prev, [provider]: false }));
+    setSaveStatus('');
+  };
+
+  const validateAndSaveApiKeys = async () => {
+    setIsSaving(true);
+    setSaveStatus('Validating and saving API keys...');
+    
+    try {
+      const validationPromises = Object.keys(apiKeys).map(async (keyName) => {
+        const apiKey = apiKeys[keyName];
+        if (apiKey) {
+          const provider = keyName.replace('_key', '');
+          const defaultModel = AVAILABLE_MODELS[provider][0];
+          const isValid = await testApiKey(provider, apiKey, defaultModel);
+          return { provider, isValid };
+        }
+        return { provider: keyName.replace('_key', ''), isValid: false };
+      });
+
+      const results = await Promise.all(validationPromises);
+      const newValidatedKeys = {};
+      let validKeysCount = 0;
+      
+      results.forEach(result => {
+        newValidatedKeys[result.provider] = result.isValid;
+        if (result.isValid) validKeysCount++;
+      });
+
+      setValidatedKeys(newValidatedKeys);
+      
+      // Save to session storage (will be cleared when tab is closed)
+      sessionStorage.setItem('aiSeoWriter_apiKeys', JSON.stringify(apiKeys));
+      
+      if (validKeysCount > 0) {
+        setSaveStatus(`✅ Successfully saved! ${validKeysCount} valid API key(s) ready to use.`);
+      } else {
+        setSaveStatus('⚠️ No valid API keys found. Please check your keys and try again.');
+      }
+      
+    } catch (error) {
+      setSaveStatus('❌ Error validating API keys. Please try again.');
+      console.error('Error validating API keys:', error);
+    } finally {
+      setIsSaving(false);
+      // Clear status message after 5 seconds
+      setTimeout(() => setSaveStatus(''), 5000);
     }
   };
 
