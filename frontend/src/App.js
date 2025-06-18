@@ -404,9 +404,9 @@ const App = () => {
                   )}
                 </button>
 
-                {!validatedKeys[contentForm.provider] && (
+                {!Object.values(validatedKeys).some(isValid => isValid) && (
                   <p className="text-center text-red-600 text-sm">
-                    Please add a valid API key for {contentForm.provider} in Settings first.
+                    Please add and save valid API keys in Settings first.
                   </p>
                 )}
               </div>
