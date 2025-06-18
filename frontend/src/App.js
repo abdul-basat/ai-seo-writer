@@ -57,7 +57,36 @@ const App = () => {
 
   useEffect(() => {
     loadContentHistory();
+    // Load API keys from session storage (not localStorage to clear on tab close)
+    const savedKeys = sessionStorage.getItem('aiSeoWriter_apiKeys');
+    if (savedKeys) {
+      const parsedKeys = JSON.parse(savedKeys);
+      setApiKeys(parsedKeys);
+      // Validate all saved keys
+      validateAllSavedKeys(parsedKeys);
+    }
   }, []);
+
+  const validateAllSavedKeys = async (keys) => {
+    const validationPromises = Object.keys(keys).map(async (keyName) => {
+      if (keys[keyName]) {
+        const provider = keyName.replace('_key', '');
+        const defaultModel = AVAILABLE_MODELS[provider][0];
+        const isValid = await testApiKey(provider, keys[keyName], defaultModel);
+        return { provider, isValid };
+      }
+      return null;
+    });
+
+    const results = await Promise.all(validationPromises);
+    const newValidatedKeys = {};
+    results.forEach(result => {
+      if (result) {
+        newValidatedKeys[result.provider] = result.isValid;
+      }
+    });
+    setValidatedKeys(newValidatedKeys);
+  };
 
   const loadContentHistory = async () => {
     try {
