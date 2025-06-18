@@ -113,9 +113,6 @@ const App = () => {
   const handleApiKeyChange = (provider, value) => {
     const keyName = `${provider}_key`;
     setApiKeys(prev => ({ ...prev, [keyName]: value }));
-    
-    // Clear validation status when key changes
-    setValidatedKeys(prev => ({ ...prev, [provider]: false }));
     setSaveStatus('');
   };
 
