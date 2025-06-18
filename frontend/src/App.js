@@ -40,6 +40,8 @@ const App = () => {
   });
   const [validatedKeys, setValidatedKeys] = useState({});
   const [showKeys, setShowKeys] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('');
   const [contentForm, setContentForm] = useState({
     keyword: '',
     provider: 'openai',
