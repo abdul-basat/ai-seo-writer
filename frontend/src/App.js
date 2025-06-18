@@ -437,12 +437,15 @@ const App = () => {
       {/* Features Section */}
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Why Choose AI SEO Writer?
             </h2>
             <p className="text-lg text-gray-600">
               Generate professional, SEO-optimized content in minutes, not hours
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              🔒 Your API keys are stored securely in your browser session and automatically cleared when you close the tab
             </p>
           </div>
 
