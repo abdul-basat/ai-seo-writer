@@ -301,7 +301,7 @@ const App = () => {
                           disabled={!validatedKeys[provider]}
                         >
                           {provider.charAt(0).toUpperCase() + provider.slice(1)} 
-                          {!validatedKeys[provider] && ' (API Key Required)'}
+                          {validatedKeys[provider] ? ' ✓' : ' (Need API Key)'}
                         </option>
                       ))}
                     </select>
