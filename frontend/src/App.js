@@ -560,9 +560,6 @@ const App = () => {
                     placeholder={`Enter your ${provider} API key`}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
-                  {validatedKeys[provider] === false && apiKeys[`${provider}_key`] && (
-                    <p className="mt-1 text-sm text-red-600">Invalid API key. Please check and try again.</p>
-                  )}
                 </div>
 
                 <div className="text-sm text-gray-600">
