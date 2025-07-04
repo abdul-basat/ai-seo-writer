@@ -417,7 +417,7 @@ const App = () => {
                 {/* Generate Button */}
                 <button
                   onClick={generateContent}
-                  disabled={isGenerating || !Object.values(validatedKeys).some(isValid => isValid)}
+                  disabled={isGenerating || !Object.values(validatedKeys).some(isValid => isValid) || !Object.values(apiKeys).some(key => key)}
                   className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg text-lg transition-colors duration-200 flex items-center justify-center"
                 >
                   {isGenerating ? (
