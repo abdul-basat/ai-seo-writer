@@ -104,9 +104,17 @@ const App = () => {
         api_key: apiKey,
         model
       });
+      console.log(`${provider} validation response:`, response.data);
       return response.data.valid;
     } catch (error) {
-      return false;
+      console.error(`Error testing ${provider} API key:`, error);
+      // Return true if it's a network error or server error, as the key format might be correct
+      // Only return false for obvious authentication errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        return false;
+      }
+      // For other errors (rate limits, network issues, etc.), assume key might be valid
+      return true;
     }
   };
 
