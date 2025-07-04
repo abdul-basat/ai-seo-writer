@@ -145,13 +145,15 @@ const App = () => {
 
       setSaveStatus('Validating API keys...');
       
-      // Basic format validation first
-      const basicValidation = {};
+      // Basic format validation (more reliable than API testing)
+      const newValidatedKeys = {};
+      let validCount = 0;
+      
       keysWithValues.forEach(keyName => {
         const provider = keyName.replace('_key', '');
         const apiKey = apiKeys[keyName].trim();
         
-        // Basic format checks
+        // Check basic format requirements for each provider
         let isValidFormat = false;
         switch(provider) {
           case 'openai':
@@ -161,22 +163,40 @@ const App = () => {
             isValidFormat = apiKey.startsWith('sk-ant-') && apiKey.length > 20;
             break;
           case 'gemini':
-            isValidFormat = apiKey.length > 20; // Gemini keys vary in format
+            isValidFormat = apiKey.length > 20;
             break;
           case 'groq':
             isValidFormat = apiKey.startsWith('gsk_') && apiKey.length > 20;
             break;
           case 'grok':
-            isValidFormat = apiKey.length > 20; // xAI keys vary in format
+            isValidFormat = apiKey.length > 20;
             break;
           default:
             isValidFormat = apiKey.length > 20;
         }
-        basicValidation[provider] = isValidFormat;
+        
+        newValidatedKeys[provider] = isValidFormat;
+        if (isValidFormat) validCount++;
       });
+
+      setValidatedKeys(newValidatedKeys);
       
-      results.forEach(result => {
-        newValidatedKeys[result.provider] = result.isValid;
+      if (validCount === keysWithValues.length && validCount > 0) {
+        setSaveStatus(`✅ Successfully saved ${validCount} API key(s)! Ready to generate content.`);
+      } else if (validCount > 0) {
+        setSaveStatus(`✅ Saved ${validCount} of ${keysWithValues.length} API key(s). Check formats for any issues.`);
+      } else {
+        setSaveStatus(`⚠️ Keys saved but formats may be incorrect. Please verify your API keys.`);
+      }
+      
+    } catch (error) {
+      setSaveStatus('❌ Error saving API keys. Please try again.');
+      console.error('Error saving API keys:', error);
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveStatus(''), 7000);
+    }
+  };
         if (result.hasKey) {
           if (result.isValid) {
             validKeysCount++;
