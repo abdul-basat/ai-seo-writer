@@ -129,7 +129,7 @@ const App = () => {
     setSaveStatus('Saving API keys...');
     
     try {
-      // Save all keys to session storage first (even if some are invalid)
+      // Save all keys to session storage first
       sessionStorage.setItem('aiSeoWriter_apiKeys', JSON.stringify(apiKeys));
       
       const validationPromises = Object.keys(apiKeys).map(async (keyName) => {
