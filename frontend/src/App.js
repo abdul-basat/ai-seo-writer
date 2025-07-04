@@ -648,7 +648,7 @@ const App = () => {
                 </div>
                 <button
                   onClick={validateAndSaveApiKeys}
-                  disabled={isSaving || Object.values(apiKeys).every(key => !key)}
+                  disabled={isSaving || !Object.values(apiKeys).some(key => key && key.trim())}
                   className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center min-w-[140px]"
                 >
                   {isSaving ? (
