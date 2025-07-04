@@ -433,9 +433,15 @@ const App = () => {
                   )}
                 </button>
 
-                {!Object.values(validatedKeys).some(isValid => isValid) && (
+                {!Object.values(validatedKeys).some(isValid => isValid) && Object.values(apiKeys).some(key => key) && (
+                  <p className="text-center text-amber-600 text-sm">
+                    Please validate your API keys in Settings by clicking "Save & Validate".
+                  </p>
+                )}
+                
+                {!Object.values(apiKeys).some(key => key) && (
                   <p className="text-center text-red-600 text-sm">
-                    Please add and save valid API keys in Settings first.
+                    Please add API keys in Settings first.
                   </p>
                 )}
               </div>
