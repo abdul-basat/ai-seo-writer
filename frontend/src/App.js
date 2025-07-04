@@ -126,7 +126,7 @@ const App = () => {
 
   const validateAndSaveApiKeys = async () => {
     setIsSaving(true);
-    setSaveStatus('Validating and saving API keys...');
+    setSaveStatus('Saving API keys...');
     
     try {
       // Save all keys to session storage first (even if some are invalid)
