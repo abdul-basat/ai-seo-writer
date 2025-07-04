@@ -132,22 +132,48 @@ const App = () => {
       // Save all keys to session storage first
       sessionStorage.setItem('aiSeoWriter_apiKeys', JSON.stringify(apiKeys));
       
-      const validationPromises = Object.keys(apiKeys).map(async (keyName) => {
-        const apiKey = apiKeys[keyName];
-        if (apiKey && apiKey.trim()) {
-          const provider = keyName.replace('_key', '');
-          const defaultModel = AVAILABLE_MODELS[provider][0];
-          const isValid = await testApiKey(provider, apiKey, defaultModel);
-          return { provider, isValid, hasKey: true };
-        }
-        return { provider: keyName.replace('_key', ''), isValid: false, hasKey: false };
-      });
+      // Count keys that have values
+      const keysWithValues = Object.keys(apiKeys).filter(keyName => 
+        apiKeys[keyName] && apiKeys[keyName].trim()
+      );
+      
+      if (keysWithValues.length === 0) {
+        setSaveStatus('ℹ️ No API keys entered. Add keys to enable content generation.');
+        setValidatedKeys({});
+        return;
+      }
 
-      const results = await Promise.all(validationPromises);
-      const newValidatedKeys = {};
-      let validKeysCount = 0;
-      let invalidKeysCount = 0;
-      const invalidProviders = [];
+      setSaveStatus('Validating API keys...');
+      
+      // Basic format validation first
+      const basicValidation = {};
+      keysWithValues.forEach(keyName => {
+        const provider = keyName.replace('_key', '');
+        const apiKey = apiKeys[keyName].trim();
+        
+        // Basic format checks
+        let isValidFormat = false;
+        switch(provider) {
+          case 'openai':
+            isValidFormat = apiKey.startsWith('sk-') && apiKey.length > 20;
+            break;
+          case 'anthropic':
+            isValidFormat = apiKey.startsWith('sk-ant-') && apiKey.length > 20;
+            break;
+          case 'gemini':
+            isValidFormat = apiKey.length > 20; // Gemini keys vary in format
+            break;
+          case 'groq':
+            isValidFormat = apiKey.startsWith('gsk_') && apiKey.length > 20;
+            break;
+          case 'grok':
+            isValidFormat = apiKey.length > 20; // xAI keys vary in format
+            break;
+          default:
+            isValidFormat = apiKey.length > 20;
+        }
+        basicValidation[provider] = isValidFormat;
+      });
       
       results.forEach(result => {
         newValidatedKeys[result.provider] = result.isValid;
