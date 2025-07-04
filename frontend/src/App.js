@@ -121,44 +121,57 @@ const App = () => {
     setSaveStatus('Validating and saving API keys...');
     
     try {
+      // Save all keys to session storage first (even if some are invalid)
+      sessionStorage.setItem('aiSeoWriter_apiKeys', JSON.stringify(apiKeys));
+      
       const validationPromises = Object.keys(apiKeys).map(async (keyName) => {
         const apiKey = apiKeys[keyName];
-        if (apiKey) {
+        if (apiKey && apiKey.trim()) {
           const provider = keyName.replace('_key', '');
           const defaultModel = AVAILABLE_MODELS[provider][0];
           const isValid = await testApiKey(provider, apiKey, defaultModel);
-          return { provider, isValid };
+          return { provider, isValid, hasKey: true };
         }
-        return { provider: keyName.replace('_key', ''), isValid: false };
+        return { provider: keyName.replace('_key', ''), isValid: false, hasKey: false };
       });
 
       const results = await Promise.all(validationPromises);
       const newValidatedKeys = {};
       let validKeysCount = 0;
+      let invalidKeysCount = 0;
+      const invalidProviders = [];
       
       results.forEach(result => {
         newValidatedKeys[result.provider] = result.isValid;
-        if (result.isValid) validKeysCount++;
+        if (result.hasKey) {
+          if (result.isValid) {
+            validKeysCount++;
+          } else {
+            invalidKeysCount++;
+            invalidProviders.push(result.provider);
+          }
+        }
       });
 
       setValidatedKeys(newValidatedKeys);
       
-      // Save to session storage (will be cleared when tab is closed)
-      sessionStorage.setItem('aiSeoWriter_apiKeys', JSON.stringify(apiKeys));
-      
-      if (validKeysCount > 0) {
-        setSaveStatus(`✅ Successfully saved! ${validKeysCount} valid API key(s) ready to use.`);
+      if (validKeysCount > 0 && invalidKeysCount === 0) {
+        setSaveStatus(`✅ All API keys saved and validated successfully! ${validKeysCount} provider(s) ready.`);
+      } else if (validKeysCount > 0 && invalidKeysCount > 0) {
+        setSaveStatus(`⚠️ Partially saved: ${validKeysCount} valid key(s), ${invalidKeysCount} invalid key(s) (${invalidProviders.join(', ')}). Valid keys are ready to use.`);
+      } else if (validKeysCount === 0 && invalidKeysCount > 0) {
+        setSaveStatus(`❌ Keys saved but none are valid. Please check: ${invalidProviders.join(', ')}.`);
       } else {
-        setSaveStatus('⚠️ No valid API keys found. Please check your keys and try again.');
+        setSaveStatus('ℹ️ Keys saved. Add valid API keys to enable content generation.');
       }
       
     } catch (error) {
-      setSaveStatus('❌ Error validating API keys. Please try again.');
+      setSaveStatus('❌ Error saving API keys. Please try again.');
       console.error('Error validating API keys:', error);
     } finally {
       setIsSaving(false);
-      // Clear status message after 5 seconds
-      setTimeout(() => setSaveStatus(''), 5000);
+      // Clear status message after 7 seconds
+      setTimeout(() => setSaveStatus(''), 7000);
     }
   };
 
