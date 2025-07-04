@@ -187,7 +187,12 @@ const App = () => {
 
     const apiKey = apiKeys[`${contentForm.provider}_key`];
     if (!apiKey) {
-      alert(`Please enter a valid API key for ${contentForm.provider}`);
+      alert(`Please add an API key for ${contentForm.provider} in Settings first.`);
+      return;
+    }
+
+    if (!validatedKeys[contentForm.provider]) {
+      alert(`Please validate your ${contentForm.provider} API key in Settings first by clicking "Save & Validate".`);
       return;
     }
 
@@ -209,7 +214,27 @@ const App = () => {
       loadContentHistory(); // Refresh history
     } catch (error) {
       console.error('Error generating content:', error);
-      alert('Error generating content: ' + (error.response?.data?.detail || error.message));
+      
+      // Provide specific error messages based on the error type
+      if (error.response?.status === 401) {
+        alert(`❌ Invalid API key for ${contentForm.provider}. Please check your API key in Settings and try again.`);
+      } else if (error.response?.status === 429) {
+        alert(`❌ Rate limit exceeded for ${contentForm.provider}. Please try again in a few minutes.`);
+      } else if (error.response?.status === 400) {
+        const errorMsg = error.response?.data?.detail || 'Invalid request parameters';
+        alert(`❌ Error: ${errorMsg}`);
+      } else if (error.response?.status === 500) {
+        const errorMsg = error.response?.data?.detail || 'Server error occurred';
+        if (errorMsg.includes('API') || errorMsg.includes('key') || errorMsg.includes('auth')) {
+          alert(`❌ API Authentication Error with ${contentForm.provider}: ${errorMsg}\n\nPlease verify your API key in Settings.`);
+        } else {
+          alert(`❌ Server Error: ${errorMsg}`);
+        }
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        alert('❌ Network error. Please check your internet connection and try again.');
+      } else {
+        alert(`❌ Error generating content: ${error.response?.data?.detail || error.message}`);
+      }
     } finally {
       setIsGenerating(false);
     }
